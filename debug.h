@@ -27,6 +27,8 @@ bp_def ** find_breakpoint(bp_def ** cur, uint32_t address);
 bp_def ** find_breakpoint_idx(bp_def ** cur, uint32_t index);
 void add_display(disp_def ** head, uint32_t *index, char format_char, char * param);
 void remove_display(disp_def ** head, uint32_t index);
+uint16_t m68k_read_word(uint32_t address, m68k_context *context);
+uint32_t m68k_read_long(uint32_t address, m68k_context *context);
 void debugger(m68k_context * context, uint32_t address);
 z80_context * zdebugger(z80_context * context, uint16_t address);
 void print_m68k_help();

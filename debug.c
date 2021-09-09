@@ -10,6 +10,7 @@
 #include "util.h"
 #include "terminal.h"
 #include "z80inst.h"
+#include "profiler.h"
 
 #ifdef NEW_CORE
 #define Z80_OPTS opts
@@ -742,6 +743,28 @@ int run_debugger_command(m68k_context *context, uint32_t address, char *input_bu
 			}
 			
 			break;
+		case 'm':
+			if (input_buf[1] == 'b') {
+				char *file_name = NULL;
+				for (int i = 0; input_buf[i] != 0; i++) {
+					if (input_buf[i+1] == ' ' && input_buf[i+2] != 0) {
+						file_name = &input_buf[i+2];
+						break;
+					}
+				}
+				profiler_set_breakpoint_path(file_name);
+				break;
+			} else {
+				char *file_name = "trace.mdp";
+				for (int i = 0; input_buf[i] != 0; i++) {
+					if (input_buf[i+1] == ' ' && input_buf[i+2] != 0) {
+						file_name = &input_buf[i+2];
+						break;
+					}
+				}
+				profiler_start(context, file_name);
+				return 0;
+			}
 		case 'n':
 			if (inst.op == M68K_RTS) {
 				after = m68k_read_long(context->aregs[7], context);
@@ -853,6 +876,9 @@ int run_debugger_command(m68k_context *context, uint32_t address, char *input_bu
 			} else if (input_buf[1] == 'r') {
 				system->header.soft_reset(&system->header);
 				return 0;
+			} else if (input_buf[1] == 'm') {
+				profiler_stop(context);
+				break;
 			} else {
 				if (inst.op == M68K_RTS) {
 					after = m68k_read_long(context->aregs[7], context);
@@ -968,6 +994,9 @@ void print_m68k_help()
 	printf("    d BREAKPOINT         - Delete a 68K breakpoint\n");
 	printf("    co BREAKPOINT        - Run a list of debugger commands each time\n");
 	printf("                           BREAKPOINT is hit\n");
+	printf("    mbp [breakpoint file]- Set the path of the manual breakpoint file for the profiler\n");
+	printf("    mdp [mdp FILE]       - Starts profiler\n");
+	printf("    smdp                 - Stops profiler\n");
 	printf("    a ADDRESS            - Advance to address\n");
 	printf("    n                    - Advance to next instruction\n");
 	printf("    o                    - Advance to next instruction ignoring branches to\n");

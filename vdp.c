@@ -11,6 +11,7 @@
 #include "util.h"
 #include "event_log.h"
 #include "terminal.h"
+#include "profiler.h"
 
 #define NTSC_INACTIVE_START 224
 #define PAL_INACTIVE_START 240
@@ -1892,6 +1893,7 @@ static void vdp_advance_line(vdp_context *context)
 		context->flags2 |= FLAG2_HINT_PENDING;
 		context->pending_hint_start = context->cycles;
 		context->hint_counter = context->regs[REG_HINT];
+		profiler_notify_hint(context->cycles);
 	}
 }
 
@@ -3507,6 +3509,7 @@ static void vdp_inactive(vdp_context *context, uint32_t target_cycles, uint8_t i
 		} else if (context->vcounter == vint_line && context->hslot == vint_slot) {
 			context->flags2 |= FLAG2_VINT_PENDING;
 			context->pending_vint_start = context->cycles;
+			profiler_notify_vint(context->cycles);
 		} else if (context->vcounter == context->inactive_start && context->hslot == 1 && (context->regs[REG_MODE_4] & BIT_INTERLACE)) {
 			context->flags2 ^= FLAG2_EVEN_FIELD;
 		}

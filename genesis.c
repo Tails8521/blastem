@@ -20,6 +20,7 @@
 #include "jcart.h"
 #include "config.h"
 #include "event_log.h"
+#include "profiler.h"
 #define MCLKS_NTSC 53693175
 #define MCLKS_PAL  53203395
 
@@ -472,6 +473,7 @@ m68k_context * sync_components(m68k_context * context, uint32_t address)
 			}
 			event_cycle_adjust(mclks, deduction);
 			gen->last_flush_cycle -= deduction;
+			profiler_notify_adjust_cycles(deduction);
 		}
 	} else if (mclks - gen->last_flush_cycle > gen->soft_flush_cycles) {
 		event_soft_flush(mclks);
